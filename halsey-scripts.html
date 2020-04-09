@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>
+    </title>
+  </head>
+  <body>
+    <script>
+
+      function makeDate() {
+        var result =  "check-in-month=03&check-out-month=03&check-out-day=30&check-in-day=20&check-in-year=2020&check-out-year=2020";
+        let numbers = /[0-9]/g;
+        let dates = result.match(numbers);
+        return dates;
+      }
+
+      const dates = makeDate();
+
+      const monthIn = dates[0]+=dates[1];
+      const monthOut = dates[2]+=dates[3];
+      const dayIn = dates[6]+=dates[7];
+      const dayOut = dates[4]+=dates[5];
+      const yearIn = dates[8]+=dates[9]+=dates[10]+=dates[11];
+      const yearOut = dates[12]+=dates[13]+=dates[14]+=dates[15];
+
+      function checkIn() {
+        return "CHECK IN: "+monthIn+"/"+dayIn+"/"+yearIn;
+      }
+
+      function checkOut() {
+        return "CHECK OUT: "+monthOut+"/"+dayOut+"/"+yearOut;
+      }
+
+      const first = new Date(yearIn, monthIn, dayIn);
+      const second = new Date(yearOut, monthOut, dayOut);
+
+      function numberOfNights() {
+        return (second - first)/86400000;
+      }
+
+      function nightsNeeded() {
+        let length = numberOfNights();
+        let nights = [first];
+        for(let i = 1; i < length; i++) {
+          let x = new Date();
+          x.setDate(first.getDate()+i);
+          nights.push(x);
+        }
+        return nights;
+      }
+
+      checkIn();
+      checkOut();
+      nightsNeeded();
+
+
+
+
+    </script>
+  </body>
+</html>
