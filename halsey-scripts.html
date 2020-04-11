@@ -7,56 +7,98 @@
   </head>
   <body>
     <script>
+          $(document).ready(function() {
 
+            var guests = $('.guests')[0];
+            var checkIn = $('.check-in')[0];
+            var checkOut = $('.check-out')[0];
+            var nights = $('.nights')[0];
 
-    function makeDate() {
-      var result =  "check-in-month=03&check-out-month=03&check-out-day=30&check-in-day=20&check-in-year=2020&check-out-year=2020";
-      let numbers = /[0-9]/g;
-      let dates = result.match(numbers);
-      return dates;
-    }
+            function makeDate(result) {
+              let numbers = /[0-9]/g;
+              let dates = result.match(numbers);
+              return dates;
+            }
 
-    const dates = makeDate();
+            function makeInnerHTML(str, m, d, y) {
+              return str + m + "/" + d + "/" + y;
+            }
 
-    const monthIn = dates[0]+=dates[1];
-    const monthOut = dates[2]+=dates[3];
-    const dayIn = dates[6]+=dates[7];
-    const dayOut = dates[4]+=dates[5];
-    const yearIn = dates[8]+=dates[9]+=dates[10]+=dates[11];
-    const yearOut = dates[12]+=dates[13]+=dates[14]+=dates[15];
+            function numberOfNights(first, second) {
+              let x = ((second - first)/86400000).toString();
+              return x+=" NIGHTS";
+            }
 
-    function checkIn() {
-      return "CHECK IN: "+monthIn+"/"+dayIn+"/"+yearIn;
-    }
+            function nightsNeeded(first, second) {
+              let length = (second - first)/86400000;
+              let days = [];
+              for(let i = 1; i < length; i++) {
+                let x = new Date();
+                x.setDate(first.getDate()+i);
+                x = ("0"+(x.getMonth()+1)).slice(-2) + "-" + ("0" + x.getDate()).slice(-2) + "-" + x.getFullYear();
+                days.push(x);
+              }
+              return days;
+            }
 
-    function checkOut() {
-      return "CHECK OUT: "+monthOut+"/"+dayOut+"/"+yearOut;
-    }
+            let roomTypes = $('h1.room---room-type');
+            let roomNumbers = $('div.room---room-number');
+            let dates = $('div.room---date');
 
-    const first = new Date(yearIn, monthIn, dayIn);
-    const second = new Date(yearOut, monthOut, dayOut);
+            function grabText(array) {
+              let textArray = [];
+              for(let x of array){
+                textArray.push(x.innerHTML);
+              }
+              return textArray;
+            }
 
-    function numberOfNights() {
-      return (second - first)/86400000;
-    }
+            let roomMap = {};
+            roomTypes = grabText(roomTypes);
+            roomNumbers = grabText(roomNumbers);
+            dates = grabText(dates);
 
-    function nightsNeeded() {
-      let length = numberOfNights();
-      let nights = [];
-      for(let i = 1; i < length; i++) {
-        let x = new Date();
-        x.setDate(first.getDate()+i);
-        x = ("0"+(x.getMonth()+1)).slice(-2) + "-" + ("0" + x.getDate()).slice(-2) + "-" + x.getFullYear();
-        nights.push(x);
-      }
-      return nights;
-    }
+            function makeObj() {
+              for(let i=0; i < roomTypes.length; i++) {
+                if(!roomMap[roomTypes[i]]) {
+                  roomMap[roomTypes[i]] = {};
+                }
+                if(!roomMap[roomTypes[i]][roomNumbers[i]]){
+                  roomMap[roomTypes[i]][roomNumbers[i]] = [];
+                }
+                if(!roomMap[roomTypes[i]][roomNumbers[i]][dates[i]]){
+                  roomMap[roomTypes[i]][roomNumbers[i]].push(dates[i]);
+                }
+              }
+              return roomMap;
+            }
 
-    checkIn();
-    checkOut();
-    nightsNeeded();
+            $('#wf-form-Room-Search').submit(function() {
+              var values = $(this).serialize();
+              let dates = makeDate(values);
 
+              const monthIn = dates[0]+=dates[1];
+              const monthOut = dates[2]+=dates[3];
+              const dayIn = dates[6]+=dates[7];
+              const dayOut = dates[4]+=dates[5];
+              const yearIn = dates[8]+=dates[9]+=dates[10]+=dates[11];
+              const yearOut = dates[12]+=dates[13]+=dates[14]+=dates[15];
+        	    const first = new Date(yearIn, monthIn, dayIn);
+              const second = new Date(yearOut, monthOut, dayOut);
+              const stay = numberOfNights(first, second);
+              const days = nightsNeeded(first, second);
+              const roomsObj = makeObj();
 
+              checkIn.innerHTML = makeInnerHTML("CHECK IN: ", monthIn, dayIn, yearIn);
+              checkOut.innerHTML = makeInnerHTML("CHECK OUT: ", monthOut, dayOut, yearOut);
+              nights.innerHTML = stay;
+              $('.stay-header').css({ "display": "block"});
+              $('.stay-footer').css({ "display": "block"});
+              console.log(days, roomsObj);
+
+            });
+
+          })
     </script>
   </body>
 </html>
