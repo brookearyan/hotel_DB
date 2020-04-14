@@ -87,22 +87,28 @@
           $('.stay-header').css({ "display": "block"});
           $('.stay-footer').css({ "display": "block"});
           console.log(days, roomsObj);
+
+
           function createItem(rmName, date) {
             return date.split("-").join("")+"_"+rmName;
           }
 
           function findDates() {
             let available = [];
+
             for(let rmType in roomMap) {
               let rmObj = roomMap[rmType];
+
               for(let rm in rmObj) {
-                 let included = [];
+                let included = [];
+
                 for(let day of days) {
                   if(rmObj[rm].includes(day)){
                     included.push(rm);
                   }
                 }
-                if(included.length == days.length){
+
+                if(included.length === days.length){
                   let results = new Object();
                   results[rmType] = rm;
                   results["items"] = [];
