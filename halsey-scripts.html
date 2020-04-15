@@ -122,13 +122,15 @@
 
       checkIn.innerHTML = makeInnerHTML("CHECK IN: ", monthIn, dayIn, yearIn);
       checkOut.innerHTML = makeInnerHTML("CHECK OUT: ", monthOut, dayOut, yearOut);
+      nights.innerHTML = nightCount;
+
       $('.stay-header').css({ "display": "block"});
       $('.stay-footer').css({ "display": "block"});
 
-      console.log("our", ourRooms, "map", roomMap, "final", roomsAvailable);
+  console.log("count", nightCount, "final", roomsAvailable);
 
    });
 
- })
 
+ })
 </script>
