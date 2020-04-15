@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <script>
+      $(document).ready(function() {
+
+        function makeDate(str) {
+          let numbers = /[0-9]/g;
+          let digits = str.match(numbers);
+          return digits;
+        }
+
+        $('#wf-form-Room-Search').submit(function() {
+          var values = $(this).serialize();
+          console.log("this", this, "values", values);
+          //returns "this" (HTML form element) &&
+          // "values check-in-month=01&check-in-day=01&check-in-year=2020&check-out-day=14&check-out-month=01&check-out-year=2020"
+
+          let digits = makeDate(values);
+          console.log("now digits", digits);
+          // returns ["0", "1", "0", "1", "2", "0", "2", "0", "1", "4", "0", "1", "2", "0", "2", "0"]
+
+          const monthIn = digits[0]+=digits[1];
+          const monthOut = digits[2]+=digits[3];
+          const dayIn = digits[6]+=digits[7];
+          const dayOut = digits[4]+=digits[5];
+          const yearIn = digits[8]+=digits[9]+=digits[10]+=digits[11];
+          const yearOut = digits[12]+=digits[13]+=digits[14]+=digits[15];
+          const first = new Date(yearIn, monthIn, dayIn);
+          const second = new Date(yearOut, monthOut, dayOut);
+
+          checkIn.innerHTML = makeInnerHTML("CHECK IN: ", monthIn, dayIn, yearIn);
+          checkOut.innerHTML = makeInnerHTML("CHECK OUT: ", monthOut, dayOut, yearOut);
+          console.log(digits, values);
+       });
+     })
+</script>
+  </body>
+</html>

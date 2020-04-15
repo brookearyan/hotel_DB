@@ -1,128 +1,134 @@
 <script>
-      $(document).ready(function() {
+  $(document).ready(function() {
 
-        var guests = $('.guests')[0];
-        var checkIn = $('.check-in')[0];
-        var checkOut = $('.check-out')[0];
-        var nights = $('.nights')[0];
+    var guests = $('.guests')[0];
+    var checkIn = $('.check-in')[0];
+    var checkOut = $('.check-out')[0];
+    var nights = $('.nights')[0];
 
-        function makeDate(result) {
-          let numbers = /[0-9]/g;
-          let dates = result.match(numbers);
-          return dates;
+    function makeInnerHTML(str, m, d, y) {
+      return str + m + "/" + d + "/" + y;
+    }
+
+    function makeDate(str) {
+      let numbers = /[0-9]/g;
+      let digits = str.match(numbers);
+      return digits;
+    }
+
+    function makeDigits(str) {
+      let numbers = /[0-9]/g;
+      let dates = str.match(numbers);
+      return dates;
+    }
+
+    function numberOfNights(dateOne, dateTwo) {
+      let x = ((dateTwo - dateOne)/86400000).toString();
+      return x+=" NIGHTS";
+    }
+
+    function nightsNeeded(dateOne, dateTwo) {
+      let length = (dateTwo - dateOne)/86400000;
+      let days = [];
+      for(let i = 0; i < length; i++) {
+        let x = new Date();
+        x.setDate(dateOne.getDate()+i);
+        x = x.getFullYear() + "-" + ("0"+(x.getMonth()+1)).slice(-2) + "-" + ("0" + x.getDate()).slice(-2);
+        days.push(x);
+      }
+      return days;
+    }
+
+    let roomTypes = $('h1.room---room-type');
+    let roomNumbers = $('div.room---room-number');
+    let roomDates = $('div.room---date');
+
+    function grabText(array) {
+      let textArray = [];
+      for(let x of array){
+        textArray.push(x.innerHTML);
+      }
+      return textArray;
+    }
+
+    roomTypes = grabText(roomTypes);
+    roomNumbers = grabText(roomNumbers);
+    roomDates = grabText(roomDates);
+
+    let roomMap = {};
+
+    function makeObj() {
+      for(let i=0; i < roomTypes.length; i++) {
+        if(!roomMap[roomTypes[i]]) {
+          roomMap[roomTypes[i]] = {};
         }
-
-        function makeInnerHTML(str, m, d, y) {
-          return str + m + "/" + d + "/" + y;
+        if(!roomMap[roomTypes[i]][roomNumbers[i]]){
+          roomMap[roomTypes[i]][roomNumbers[i]] = [];
         }
-
-        function numberOfNights(first, second) {
-          let x = ((second - first)/86400000).toString();
-          return x+=" NIGHTS";
+        if(!roomMap[roomTypes[i]][roomNumbers[i]][roomDates[i]]){
+          roomMap[roomTypes[i]][roomNumbers[i]].push(roomDates[i]);
         }
+      }
+      return roomMap;
+    }
 
-        function nightsNeeded(first, second) {
-          let length = (second - first)/86400000;
-          let days = [];
-          for(let i = 1; i < length; i++) {
-            let x = new Date();
-            x.setDate(first.getDate()+i);
-            x = ("0"+(x.getMonth()+1)).slice(-2) + "-" + ("0" + x.getDate()).slice(-2) + "-" + x.getFullYear();
-            days.push(x);
-          }
-          return days;
-        }
+    function createItem(rmName, date) {
+      return date.split("-").join("")+"_"+rmName;
+    }
 
-        let roomTypes = $('h1.room---room-type');
-        let roomNumbers = $('div.room---room-number');
-        let dates = $('div.room---date');
+    function findDates(days) {
+      let available = [];
 
-        function grabText(array) {
-          let textArray = [];
-          for(let x of array){
-            textArray.push(x.innerHTML);
-          }
-          return textArray;
-        }
+      for(let rmType in roomMap) {
+        let rmObj = roomMap[rmType];
 
-        let roomMap = {};
-        roomTypes = grabText(roomTypes);
-        roomNumbers = grabText(roomNumbers);
-        dates = grabText(dates);
-
-        function makeObj() {
-          for(let i=0; i < roomTypes.length; i++) {
-            if(!roomMap[roomTypes[i]]) {
-              roomMap[roomTypes[i]] = {};
+        for(let rm in rmObj) {
+          let included = [];
+          for(let day of days) {
+            if(rmObj[rm].includes(day)){
+              included.push(rm);
             }
-            if(!roomMap[roomTypes[i]][roomNumbers[i]]){
-              roomMap[roomTypes[i]][roomNumbers[i]] = [];
-            }
-            if(!roomMap[roomTypes[i]][roomNumbers[i]][dates[i]]){
-              roomMap[roomTypes[i]][roomNumbers[i]].push(dates[i]);
-            }
           }
-          return roomMap;
+          if(included.length === days.length){
+            let results = new Object();
+            results[rmType] = rm;
+            results["items"] = [];
+            let array = days.map((day)=> {
+              results.items.push(createItem(rm, day));
+            })
+            available.push(results);
+          }
         }
+      }
+      return available;
+    }
 
-        $('#wf-form-Room-Search').submit(function() {
-          var values = $(this).serialize();
-          let dates = makeDate(values);
+    $('#wf-form-Room-Search').submit(function() {
+      var values = $(this).serialize();
+      let digits = makeDigits(values);
 
-          const monthIn = dates[0]+=dates[1];
-          const monthOut = dates[2]+=dates[3];
-          const dayIn = dates[6]+=dates[7];
-          const dayOut = dates[4]+=dates[5];
-          const yearIn = dates[8]+=dates[9]+=dates[10]+=dates[11];
-          const yearOut = dates[12]+=dates[13]+=dates[14]+=dates[15];
-          const first = new Date(yearIn, monthIn, dayIn);
-          const second = new Date(yearOut, monthOut, dayOut);
-          const stay = numberOfNights(first, second);
-          const days = nightsNeeded(first, second);
-          const roomsObj = makeObj();
+      const monthIn = digits[0]+=digits[1];
+      const dayIn = digits[2]+=digits[3];
+      const yearIn = digits[4]+=digits[5]+=digits[6]+=digits[7];
+      const monthOut = digits[10]+=digits[11];
+      const dayOut = digits[8]+=digits[9];
+      const yearOut = digits[12]+=digits[13]+=digits[14]+=digits[15];
+      const first = new Date(yearIn, monthIn, dayIn);
+      const second = new Date(yearOut, monthOut, dayOut);
+      const nightCount = numberOfNights(first, second);
+      const days = nightsNeeded(first, second);
+      const ourRooms = makeObj();
+      const roomsAvailable = findDates(days);
 
-          checkIn.innerHTML = makeInnerHTML("CHECK IN: ", monthIn, dayIn, yearIn);
-          checkOut.innerHTML = makeInnerHTML("CHECK OUT: ", monthOut, dayOut, yearOut);
-          nights.innerHTML = stay;
-          $('.stay-header').css({ "display": "block"});
-          $('.stay-footer').css({ "display": "block"});
-          console.log(days, roomsObj);
+      checkIn.innerHTML = makeInnerHTML("CHECK IN: ", monthIn, dayIn, yearIn);
+      checkOut.innerHTML = makeInnerHTML("CHECK OUT: ", monthOut, dayOut, yearOut);
+      $('.stay-header').css({ "display": "block"});
+      $('.stay-footer').css({ "display": "block"});
 
+      console.log("our", ourRooms, "map", roomMap, "final", roomsAvailable);
 
-          function createItem(rmName, date) {
-            return date.split("-").join("")+"_"+rmName;
-          }
+   });
 
-          function findDates() {
-            let available = [];
-
-            for(let rmType in roomMap) {
-              let rmObj = roomMap[rmType];
-
-              for(let rm in rmObj) {
-                let included = [];
-
-                for(let day of days) {
-                  if(rmObj[rm].includes(day)){
-                    included.push(rm);
-                  }
-                }
-
-                if(included.length === days.length){
-                  let results = new Object();
-                  results[rmType] = rm;
-                  results["items"] = [];
-                  let array = days.map((day)=> {
-                    results.items.push(createItem(rm, day));
-                  })
-                  available.push(results);
-                }
-              }
-            }
-            console.log("rms available!", available);
-            return available;
-          }
-       });
-     })
+ })
 
 </script>
