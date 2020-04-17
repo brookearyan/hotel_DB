@@ -109,17 +109,21 @@
       return list;
     }
 
-    function rmUnavailable() {
+    function rmUnavailable(types) {
       let elements = $('.room-card-container');
       for(var i = elements.length; i--;) {
-        !elements[i].innerText.includes("FAMILY COTTAGE") ? elements[i].remove() : null;
+        let list = [];
+        for(let type of types) {
+          elements[i].innerText.includes(type) ? list.push(type) : null;
+        }
+        !list[0] ? elements[i].remove() : null;
+        console.log(list);
       }
     }
 
     $('#wf-form-Room-Search').submit(function() {
       var values = $(this).serialize();
       let digits = makeDigits(values);
-      rmUnavailable();
 
       const monthIn = digits[0]+=digits[1];
       const dayIn = digits[2]+=digits[3];
@@ -133,6 +137,8 @@
       const days = nightsNeeded(first, second);
       const ourRooms = makeObj();
       const roomsAvailable = findDates(days);
+      const typeList = rmTypeList(roomsAvailable);
+      rmUnavailable(typeList);
 
       checkIn.innerHTML = makeInnerHTML("CHECK IN: ", monthIn, dayIn, yearIn);
       checkOut.innerHTML = makeInnerHTML("CHECK OUT: ", monthOut, dayOut, yearOut);
@@ -140,9 +146,6 @@
 
       $('.stay-header').css({ "display": "block"});
       $('.stay-footer').css({ "display": "block"});
-
-
-      console.log(rmTypeList(roomsAvailable));
 
    });
 
